@@ -35,7 +35,7 @@ Letter → "Letter. L-E-double T-E-R. Letter"
 <h2 id="word">Press Start</h2>
 
 <button onclick="startGame()">Start Game</button>
-<button id="listenBtn" onclick="speakWord()">🔊 Listen Again</button>
+<button id="listenBtn" onclick="speakWord()">🔊 Play word</button>
 
 <br><br>
 
@@ -69,7 +69,7 @@ let shuffledWords = [];
 let currentIndex = 0;
 
 let listenCount = 0;
-let maxListens = 1;
+let maxListens = 2;
 
 /* 🔀 Shuffle words */
 function shuffle(array) {
