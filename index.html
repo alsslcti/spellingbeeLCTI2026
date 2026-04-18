@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Spelling Bee 6th - 7th LCTI</title>
+
+<style>
+body { font-family: Arial; text-align:center; background:#eef5ff; }
+h1 { color:#1e3a8a; }
+#box { background:white; padding:15px; margin:15px auto; width:80%; border-radius:10px; }
+button { padding:10px 15px; margin:5px; border:none; border-radius:8px; cursor:pointer; background:#3b82f6; color:white; }
+#word { font-size:28px; margin:20px; }
+#result { font-size:20px; margin:15px; }
+</style>
+
+</head>
+<body>
+
+<h1>🐝 Spelling Bee 6th - 7th LCTI</h1>
+
+<div id="box">
+<b>Instructions:</b><br><br>
+Say the word → Spell it → Repeat the word.<br>
+Use <b>"double + letter"</b> if needed.<br><br>
+
+Example:<br>
+Apple → "Apple. A-P-P-L-E. Apple"<br>
+Letter → "Letter. L-E-double T-E-R. Letter"
+</div>
+
+<h3 id="score">Score: 0 | Time: 60s</h3>
+
+<h2 id="word">Press Start</h2>
+
+<button onclick="startGame()">Start Game</button>
+<button onclick="speakWord()">🔊 Hear Word</button>
+<button onclick="startListening()">🎤 Speak</button>
+
+<br><br>
+
+<input id="manualInput" placeholder="Type spelling here (backup)" style="padding:8px; width:250px;">
+<br>
+<button onclick="checkManual()">✔ Check Answer</button>
+
+<p id="result"></p>
+
+<script>
+let words = [
+"address","adventure","answer","airport","because","beautiful","biodiversity","bravery",
+"business","busy","caption","centaur","centre","ceremony","challenge","clothes","comfortable",
+"competition","conservation","conversation","creature","crowded","cupboard","dangerous",
+"deforestation","destiny","dialogue","different","discover","dragon","early","ecosystem",
+"editor","enchanted","environment","equipment","favourite","forbidden","frame","friend",
+"friendship","gutter","house","illustrator","information","inking","instructions","interesting",
+"invisible","journey","layout","lettering","lightning","loyalty","minute","mysterious",
+"mystery","panel","people","philosopher","platform","practice","professor","project",
+"reforestation","remember","renewable","script","secret","sketch","spell","stairs",
+"storyboard","sustainability","talent","temperature","trophy","unicorn","unfortunately","weather"
+];
+
+let currentWord = "";
+let score = 0;
+let time = 60;
+let timer = null;
+
+function startGame(){
+  score = 0;
+  time = 60;
+  document.getElementById("score").innerText = "Score: 0 | Time: 60s";
+  nextWord();
+
+  if(timer) clearInterval(timer);
+
+  timer = setInterval(()=>{
+    time--;
+    document.getElementById("score").innerText = `Score: ${score} | Time: ${time}s`;
+
+    if(time <= 0){
+      clearInterval(timer);
+      document.getElementById("result").innerText = "⏰ Time's up!";
+    }
+  },1000);
+}
+
+function nextWord(){
+  currentWord = words[Math.floor(Math.random()*words.length)];
+  document.getElementById("word").innerText = "Listen carefully...";
+  document.getElementById("result").innerText = "";
+  document.getElementById("manualInput").value = "";
+  speakWord();
+}
+
+function speakWord(){
+  let msg = new SpeechSynthesisUtterance(currentWord);
+  msg.lang = "en-US";
+  speechSynthesis.speak(msg);
+}
+
+function normalize(text){
+  return text.toLowerCase()
+    .replace(/double\s+([a-z])/g, "$1$1")
+    .replace(/[^a-z]/g,"");
+}
+
+/* 🎤 VOICE (may fail depending on device) */
+function startListening(){
+  try{
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "en-US";
+
+    recognition.start();
+
+    recognition.onresult = function(event){
+      let speech = event.results[0][0].transcript;
+      evaluateAnswer(speech);
+    }
+
+  } catch {
+    alert("Voice recognition not supported on this device. Use manual input.");
+  }
+}
+
+/* ✔ COMMON VALIDATION */
+function evaluateAnswer(input){
+  let cleanSpeech = normalize(input);
+  let word = currentWord.toLowerCase();
+
+  if(cleanSpeech.includes(word)){
+    score++;
+    document.getElementById("result").innerText = "✅ Correct!";
+    setTimeout(nextWord,1500);
+  } else {
+    document.getElementById("result").innerText = "❌ Try again";
+  }
+}
+
+/* 🛟 BACKUP (ALWAYS WORKS) */
+function checkManual(){
+  let input = document.getElementById("manualInput").value;
+  evaluateAnswer(input);
+}
+</script>
+
+</body>
+</html>
