@@ -9,6 +9,7 @@ body { font-family: Arial; text-align:center; background:#eef5ff; }
 h1 { color:#1e3a8a; }
 #box { background:white; padding:15px; margin:15px auto; width:80%; border-radius:10px; }
 button { padding:10px 15px; margin:5px; border:none; border-radius:8px; cursor:pointer; background:#3b82f6; color:white; }
+button:disabled { background-color: gray; cursor: not-allowed; }
 #word { font-size:28px; margin:20px; }
 #result { font-size:20px; margin:15px; }
 input { padding:8px; width:250px; }
@@ -34,7 +35,7 @@ Letter → "Letter. L-E-double T-E-R. Letter"
 <h2 id="word">Press Start</h2>
 
 <button onclick="startGame()">Start Game</button>
-<button onclick="speakWord()">🔊 Hear Word</button>
+<button id="listenBtn" onclick="speakWord()">🔊 Listen Again</button>
 
 <br><br>
 
@@ -66,6 +67,9 @@ let timer = null;
 
 let shuffledWords = [];
 let currentIndex = 0;
+
+let listenCount = 0;
+let maxListens = 1;
 
 /* 🔀 Shuffle words */
 function shuffle(array) {
@@ -111,16 +115,31 @@ function nextWord(){
   currentWord = shuffledWords[currentIndex];
   currentIndex++;
 
+  listenCount = 0;
+
+  document.getElementById("listenBtn").disabled = false;
   document.getElementById("word").innerText = "Listen carefully...";
   document.getElementById("result").innerText = "";
   document.getElementById("manualInput").value = "";
 }
 
-/* 🔊 Speak word */
+/* 🔊 Speak word (limited) */
 function speakWord(){
+
+  if(listenCount >= maxListens){
+    document.getElementById("result").innerText = "⚠️ You can only listen one more time!";
+    return;
+  }
+
+  listenCount++;
+
   let msg = new SpeechSynthesisUtterance(currentWord);
   msg.lang = "en-US";
   speechSynthesis.speak(msg);
+
+  if(listenCount >= maxListens){
+    document.getElementById("listenBtn").disabled = true;
+  }
 }
 
 /* 🧠 Normalize input */
